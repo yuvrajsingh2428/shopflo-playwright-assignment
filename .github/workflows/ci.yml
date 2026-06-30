@@ -1,0 +1,154 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Job 1: Lint both packages (fast gate ~60s)
+  # ─────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install UI dependencies
+        run: npm ci
+        working-directory: assignment-1-ui
+
+      - name: Lint UI package
+        run: npm run lint
+        working-directory: assignment-1-ui
+
+      - name: Install API dependencies
+        run: npm ci
+        working-directory: assignment-2-api
+
+      - name: Lint API package
+        run: npm run lint
+        working-directory: assignment-2-api
+
+  # ─────────────────────────────────────────────
+  # Job 2: Playwright UI tests (Chromium)
+  # Runs in parallel with api-tests after lint
+  # ─────────────────────────────────────────────
+  ui-tests:
+    name: UI Tests
+    needs: [lint]
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ secrets.BASE_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: assignment-1-ui
+
+      - name: Install Playwright browsers (Chromium only)
+        run: npx playwright install --with-deps chromium
+        working-directory: assignment-1-ui
+
+      - name: Run UI tests
+        run: npm test
+        working-directory: assignment-1-ui
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-playwright-report
+          path: assignment-1-ui/playwright-report/
+          retention-days: 14
+
+      - name: Upload test results (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-results
+          path: assignment-1-ui/test-results/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────
+  # Job 3: Playwright API tests
+  # Runs in parallel with ui-tests after lint
+  # ─────────────────────────────────────────────
+  api-tests:
+    name: API Tests
+    needs: [lint]
+    runs-on: ubuntu-latest
+    env:
+      API_BASE_URL: ${{ secrets.API_BASE_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: assignment-2-api
+
+      - name: Run API tests
+        run: npm test
+        working-directory: assignment-2-api
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-playwright-report
+          path: assignment-2-api/playwright-report/
+          retention-days: 14
+
+      - name: Upload test results (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-results
+          path: assignment-2-api/test-results/
+          retention-days: 7
+
+# ─────────────────────────────────────────────────────
+# Future scalability notes (do not remove):
+#
+# 1. Browser matrix:
+#    strategy:
+#      matrix:
+#        browser: [chromium, firefox, webkit]
+#    Then pass: npx playwright test --project=${{ matrix.browser }}
+#
+# 2. Sharding (when suite exceeds 5-min budget):
+#    strategy:
+#      matrix:
+#        shard: ['1/3', '2/3', '3/3']
+#    Then pass: npx playwright test --shard=${{ matrix.shard }}
+#
+# 3. Nightly extended run (all browsers):
+#    schedule:
+#      - cron: '0 1 * * *'   # 1 AM UTC daily
+#
+# 4. Slack notification:
+#    Add step after tests using slackapi/slack-github-action@v1
+# ─────────────────────────────────────────────────────

@@ -1,0 +1,27 @@
+{
+  "name": "shopflo-assignment-2-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright API tests for fakestoreapi.com",
+  "scripts": {
+    "test": "playwright test",
+    "test:debug": "playwright test --debug",
+    "lint": "eslint . --ext .ts --ignore-path .eslintignore",
+    "report": "playwright show-report"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.45.0",
+    "ajv": "^8.16.0",
+    "ajv-formats": "^3.0.1",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
+  }
+}

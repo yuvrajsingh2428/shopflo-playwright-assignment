@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "auth.schema.json",
+  "title": "AuthResponse",
+  "description": "Schema for the response from POST /auth/login",
+  "type": "object",
+  "required": ["token"],
+  "additionalProperties": false,
+  "properties": {
+    "token": {
+      "type": "string",
+      "minLength": 1,
+      "description": "JWT token returned on successful authentication"
+    }
+  }
+}

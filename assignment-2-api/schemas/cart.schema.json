@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "cart.schema.json",
+  "title": "Cart",
+  "description": "Schema for a single cart response from GET /carts/:id or POST /carts",
+  "type": "object",
+  "required": ["id", "userId", "date", "products"],
+  "properties": {
+    "id": {
+      "type": "integer",
+      "description": "Unique identifier of the cart"
+    },
+    "userId": {
+      "type": "integer",
+      "description": "ID of the user who owns the cart"
+    },
+    "date": {
+      "type": "string",
+      "description": "ISO 8601 date string of the cart creation/update date"
+    },
+    "products": {
+      "type": "array",
+      "description": "List of products in the cart",
+      "items": {
+        "type": "object",
+        "required": ["productId", "quantity"],
+        "additionalProperties": false,
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "description": "ID of the product"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Quantity of this product in the cart"
+          }
+        }
+      }
+    }
+  }
+}
