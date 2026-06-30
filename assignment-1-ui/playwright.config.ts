@@ -1,7 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
+import 'dotenv/config';
 
 export default defineConfig({
   // ── Test discovery ──────────────────────────────────────────────────────────
@@ -33,7 +31,7 @@ export default defineConfig({
 
   // ── Shared settings for all projects ────────────────────────────────────────
   use: {
-    baseURL: process.env.BASE_URL ?? 'https://www.saucedemo.com',
+    baseURL: process.env.BASE_URL || 'https://www.saucedemo.com',
     headless: true,
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

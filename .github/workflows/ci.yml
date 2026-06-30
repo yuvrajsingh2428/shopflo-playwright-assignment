@@ -47,7 +47,7 @@ jobs:
     needs: [lint]
     runs-on: ubuntu-latest
     env:
-      BASE_URL: ${{ secrets.BASE_URL }}
+      BASE_URL: https://www.saucedemo.com
 
     steps:
       - name: Checkout repository
@@ -95,7 +95,7 @@ jobs:
     needs: [lint]
     runs-on: ubuntu-latest
     env:
-      API_BASE_URL: ${{ secrets.API_BASE_URL }}
+      API_BASE_URL: https://fakestoreapi.com
 
     steps:
       - name: Checkout repository

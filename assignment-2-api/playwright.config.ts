@@ -1,7 +1,5 @@
 import { defineConfig } from '@playwright/test';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
+import 'dotenv/config';
 
 export default defineConfig({
   // ── Test discovery ──────────────────────────────────────────────────────────
@@ -33,7 +31,7 @@ export default defineConfig({
 
   // ── Shared settings ──────────────────────────────────────────────────────────
   use: {
-    baseURL: process.env.API_BASE_URL ?? 'https://fakestoreapi.com',
+    baseURL: process.env.API_BASE_URL || 'https://fakestoreapi.com',
     // No browser — API tests only
     extraHTTPHeaders: {
       Accept: 'application/json',
