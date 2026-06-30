@@ -30,12 +30,20 @@ jobs:
         run: npm run lint
         working-directory: assignment-1-ui
 
+      - name: Typecheck UI package
+        run: npx tsc --noEmit
+        working-directory: assignment-1-ui
+
       - name: Install API dependencies
         run: npm ci
         working-directory: assignment-2-api
 
       - name: Lint API package
         run: npm run lint
+        working-directory: assignment-2-api
+
+      - name: Typecheck API package
+        run: npx tsc --noEmit
         working-directory: assignment-2-api
 
   # ─────────────────────────────────────────────
@@ -67,7 +75,7 @@ jobs:
         working-directory: assignment-1-ui
 
       - name: Run UI tests
-        run: npm test
+        run: npx playwright test --project=chromium
         working-directory: assignment-1-ui
 
       - name: Upload HTML report
@@ -111,7 +119,7 @@ jobs:
         working-directory: assignment-2-api
 
       - name: Run API tests
-        run: npm test
+        run: npx playwright test
         working-directory: assignment-2-api
 
       - name: Upload HTML report
