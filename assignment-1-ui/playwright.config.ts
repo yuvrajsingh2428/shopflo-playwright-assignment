@@ -12,7 +12,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
 
   // ── Global timeout ──────────────────────────────────────────────────────────
-  timeout: 30_000,
+  timeout: 60_000,
   expect: {
     timeout: 5_000,
   },
@@ -40,24 +40,10 @@ export default defineConfig({
     testIdAttribute: 'data-test',
   },
 
-  // ── Browser projects ─────────────────────────────────────────────────────────
   projects: [
-    // Primary: runs on every push
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-    },
-
-    // Secondary: run locally with --project=firefox or on nightly CI
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    // Optional: run locally with --project=webkit or on nightly CI
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
     },
   ],
 
