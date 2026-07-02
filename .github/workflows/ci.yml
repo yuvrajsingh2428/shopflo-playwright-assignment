@@ -48,7 +48,6 @@ jobs:
 
   # ─────────────────────────────────────────────
   # Job 2: Playwright UI tests (Chromium)
-  # Runs in parallel with api-tests after lint
   # ─────────────────────────────────────────────
   ui-tests:
     name: UI Tests
@@ -94,13 +93,63 @@ jobs:
           path: assignment-1-ui/test-results/
           retention-days: 7
 
+  # ─────────────────────────────────────────────────────────────────────────
+  # Job 3: FakeStore connectivity probe
+  #
+  # Standalone diagnostic job — no npm install required.
+  # Runs BEFORE api-tests to capture the exact raw HTTP status codes,
+  # response headers, and response bodies that the GitHub Actions runner
+  # receives from fakestoreapi.com.
+  #
+  # All steps have continue-on-error: true so this job never blocks
+  # the pipeline. Evidence is captured in the step logs.
+  # ─────────────────────────────────────────────────────────────────────────
+  debug-fakestore:
+    name: Debug — FakeStore Connectivity
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Probe all cart endpoints from GitHub Actions runner
+        run: |
+          echo "============================================="
+          echo "Runner public IP:"
+          curl -s https://api.ipify.org; echo ""
+          echo "============================================="
+          echo ""
+
+          echo "=== GET /carts ==="
+          curl -i --max-time 15 https://fakestoreapi.com/carts
+          echo ""
+
+          echo "=== GET /carts/1 ==="
+          curl -i --max-time 15 https://fakestoreapi.com/carts/1
+          echo ""
+
+          echo "=== POST /carts ==="
+          curl -i --max-time 15 -X POST https://fakestoreapi.com/carts \
+            -H "Content-Type: application/json" \
+            -d '{"userId":1,"date":"2024-06-01","products":[{"productId":1,"quantity":1}]}'
+          echo ""
+
+          echo "=== PUT /carts/1 ==="
+          curl -i --max-time 15 -X PUT https://fakestoreapi.com/carts/1 \
+            -H "Content-Type: application/json" \
+            -d '{"userId":3,"date":"2024-06-01","products":[{"productId":2,"quantity":1}]}'
+          echo ""
+
+          echo "=== DELETE /carts/1 ==="
+          curl -i --max-time 15 -X DELETE https://fakestoreapi.com/carts/1
+          echo ""
+        continue-on-error: true
+
   # ─────────────────────────────────────────────
-  # Job 3: Playwright API tests
-  # Runs in parallel with ui-tests after lint
+  # Job 4: Playwright API tests
+  # Runs after lint AND debug-fakestore so probe
+  # logs are always visible before test output.
   # ─────────────────────────────────────────────
   api-tests:
     name: API Tests
-    needs: [lint]
+    needs: [lint, debug-fakestore]
     runs-on: ubuntu-latest
     env:
       API_BASE_URL: https://fakestoreapi.com
@@ -117,22 +166,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
         working-directory: assignment-2-api
-
-      # ── Connectivity probe (evidence gathering only, always passes) ───────────
-      - name: Probe GET /carts/1 from CI runner
-        run: |
-          echo "=== curl -i https://fakestoreapi.com/carts/1 ==="
-          curl -i --max-time 10 --silent --show-error https://fakestoreapi.com/carts/1 || true
-          echo ""
-        continue-on-error: true
-
-      - name: Probe GET /carts from CI runner
-        run: |
-          echo "=== curl -i https://fakestoreapi.com/carts ==="
-          curl -i --max-time 10 --silent --show-error https://fakestoreapi.com/carts || true
-          echo ""
-        continue-on-error: true
-      # ─────────────────────────────────────────────────────────────────────────
 
       - name: Run API tests
         run: npx playwright test
