@@ -118,6 +118,22 @@ jobs:
         run: npm ci
         working-directory: assignment-2-api
 
+      # ── Connectivity probe (evidence gathering only, always passes) ───────────
+      - name: Probe GET /carts/1 from CI runner
+        run: |
+          echo "=== curl -i https://fakestoreapi.com/carts/1 ==="
+          curl -i --max-time 10 --silent --show-error https://fakestoreapi.com/carts/1 || true
+          echo ""
+        continue-on-error: true
+
+      - name: Probe GET /carts from CI runner
+        run: |
+          echo "=== curl -i https://fakestoreapi.com/carts ==="
+          curl -i --max-time 10 --silent --show-error https://fakestoreapi.com/carts || true
+          echo ""
+        continue-on-error: true
+      # ─────────────────────────────────────────────────────────────────────────
+
       - name: Run API tests
         run: npx playwright test
         working-directory: assignment-2-api
